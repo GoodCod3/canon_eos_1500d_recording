@@ -8,16 +8,13 @@ cleanup() {
 
 
 echo "Delete any loop back"
-
 sudo rmmod v4l2loopback
 
 echo "Initializing loopback"
-
 sudo modprobe v4l2loopback exclusive_caps=1 max_buffers=2
 
-echo "Initializing audio caoture..."
-
-arecord -D hw:1,0 -f S16_LE -r 16000 -c 1 output_audio.wav &
+echo "Starting audio capturing..."
+arecord -D hw:1,0 -f S16_LE -r 16000 -c 1 output/output_audio.wav &
 AUDIO_PID=$!
 
 sleep 2 
@@ -32,8 +29,9 @@ fi
 trap cleanup SIGINT
 
 echo "Capturing video..."
+gphoto2 --stdout --capture-movie | ffmpeg -i - -c:v libx264 -pix_fmt yuv420p -threads 0 output/output_video.mp4
 
-gphoto2 --stdout --capture-movie | ffmpeg -i - -c:v libx264 -pix_fmt yuv420p -threads 0 output_video.mp4
+echo "Saving video and stop audio recording..."
 
 cleanup
 
