@@ -17,7 +17,6 @@ sudo modprobe v4l2loopback exclusive_caps=1 max_buffers=2
 
 echo "Initializing audio caoture..."
 
-# Iniciar la grabación de audio
 arecord -D hw:1,0 -f S16_LE -r 16000 -c 1 output_audio.wav &
 AUDIO_PID=$!
 
@@ -38,3 +37,8 @@ gphoto2 --stdout --capture-movie | ffmpeg -i - -c:v libx264 -pix_fmt yuv420p -th
 
 cleanup
 
+# Stop PulseAudio if is active
+if pgrep pulseaudio > /dev/null; then
+    echo "Stopping PulseAudio"
+    pulseaudio --kill
+fi
